@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 import Places from "./components/Places.jsx";
 import { AVAILABLE_PLACES } from "./data.js";
@@ -14,7 +14,7 @@ const storedPlaces = storedIds.map((id) =>
 
 function App() {
   const selectedPlace = useRef();
-  const [modalIsOpen, setModalIsOpen] = useState(false)
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [availblePlaces, setAvailablePlaces] = useState([]);
   const [pickedPlaces, setPickedPlaces] = useState(storedPlaces);
 
@@ -46,7 +46,7 @@ function App() {
   }, []);
 
   function handleStartRemovePlace(id) {
-    setModalIsOpen(true)
+    setModalIsOpen(true);
     selectedPlace.current = id;
   }
 
@@ -76,7 +76,12 @@ function App() {
     }
   }
 
-  function handleRemovePlace() {
+  // useCallback wraps the function below as first parameter and an array of dependencies as second parameter.
+  // It returns a value, that function which you wrapped, but now such that it's not recreated
+  // whenever this surrounding component function is executed again.
+  // IMPORTANT: we should use useCallback when passing a function as a dependency
+  // inside useEffect, like in DeleteConfirmation. This will avoid an infinite loop.
+  const handleRemovePlace = useCallback(function handleRemovePlace() {
     setPickedPlaces((prevPickedPlaces) =>
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
@@ -87,11 +92,11 @@ function App() {
       "selectedPlaces",
       JSON.stringify([storedIds.filter((id) => id !== selectedPlace.current)])
     );
-  }
+  }, []);
 
   return (
     <>
-      <Modal open={modalIsOpen}>
+      <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}
           onConfirm={handleRemovePlace}

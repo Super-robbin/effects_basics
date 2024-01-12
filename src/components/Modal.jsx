@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 
-function Modal({ open, children }) {
+function Modal({ open, children, onClose }) {
   const dialog = useRef();
 
   // Effect dependencies are in the end simply prop or state values
@@ -17,8 +17,8 @@ function Modal({ open, children }) {
   }, [open]);
 
   return createPortal(
-    <dialog className="modal" ref={dialog}>
-      {children}
+    <dialog className="modal" ref={dialog} onClose={onClose}>
+      {open ? children : null}
     </dialog>,
     document.getElementById("modal")
   );
